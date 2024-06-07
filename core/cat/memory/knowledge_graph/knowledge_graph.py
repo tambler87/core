@@ -79,8 +79,9 @@ class KnowledgeGraph:
         #    RETURN u.name, p.name;        
         #""")
 
-        #while res.has_next():
-        #    log.warning(res.get_next())
+        if res:
+            while res.has_next():
+                log.warning(res.get_next())
 
 
     def create_node(self, node_type, attributes):
