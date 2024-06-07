@@ -6,7 +6,7 @@ from cat.looking_glass.stray_cat import StrayCat
 from tests.utils import send_websocket_message
 
 
-def test_session_creation_from_websocket(client, app):
+def test_session_creation_from_websocket(client):
 
     # send websocket message
     mex = {"text": "Where do I go?"}
@@ -16,7 +16,7 @@ def test_session_creation_from_websocket(client, app):
     assert "You did not configure" in res["content"]
 
     # verify session
-    strays = app.state.strays
+    strays = client.app.state.strays
     assert "Alice" in strays
     assert isinstance(strays["Alice"], StrayCat)
     assert strays["Alice"].user_id == "Alice"
@@ -26,7 +26,7 @@ def test_session_creation_from_websocket(client, app):
     assert convo[0]["message"] == mex["text"]
 
 
-def test_session_creation_from_http(client, app):
+def test_session_creation_from_http(client):
     
     content_type = "text/plain"
     file_name = "sample.txt"
@@ -47,7 +47,7 @@ def test_session_creation_from_http(client, app):
     assert response.status_code == 200
     
     # verify session
-    strays = app.state.strays
+    strays = client.app.state.strays
     assert "Alice" in strays
     assert isinstance(strays["Alice"], StrayCat)
     assert strays["Alice"].user_id == "Alice"

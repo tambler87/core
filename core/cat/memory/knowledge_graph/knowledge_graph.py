@@ -18,7 +18,7 @@ class KnowledgeGraph:
 
         if kg_path is None:
             kg_path = self.get_folder_name()
-        self.kg_path = kg_path
+        self.db_path = kg_path
 
         shutil.rmtree(kg_path, ignore_errors=True) 
         
@@ -28,11 +28,12 @@ class KnowledgeGraph:
 
         # don't know if this can be kept as instance attribute
         # https://kuzudb.com/api-docs/python/kuzu.html#Database.close
-        self.kg = kuzu.Database(self.kg_path)
+        self.db = kuzu.Database(self.db_path, lazy_init=True)
+        #self.db_connection = kuzu.Connection(self.db)
 
         # Populate initial graph
         if to_populate:
-            pass#self.create_base_graph()
+            self.create_base_graph()
 
     def get_folder_name(self):
         return "cat/data/local_knowledge_graph"
@@ -79,8 +80,8 @@ class KnowledgeGraph:
         #    RETURN u.name, p.name;        
         #""")
 
-        while res.has_next():
-            log.warning(res.get_next())
+        #while res.has_next():
+        #    log.warning(res.get_next())
 
 
     def create_node(self, node_type, attributes):
@@ -94,8 +95,8 @@ class KnowledgeGraph:
         
 
     def migrate_legacy_sqlite(self):
-
-        db_file = get_env("CCAT_METADATA_FILE")
+        from cat.db.database import Database
+        db_file = Database().get_file_name() #get_env("CCAT_METADATA_FILE")
         if not os.path.exists(db_file):
             return
         
@@ -116,11 +117,13 @@ class KnowledgeGraph:
 
 
     def __call__(self, query: str, params=None):
-
+        # on multithreading:
+        # https://github.com/kuzudb/kuzu/issues/3260#issuecomment-2051898996
         try:
-            with kuzu.Connection(self.kg) as connection:
+            with kuzu.Connection(self.db) as connection:
                 result = connection.execute(query, params)
             return result
+            #result = self.db_connection.execute(query, params) 
         except Exception as e:
             log.error(e)
 
