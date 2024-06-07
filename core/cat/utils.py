@@ -4,6 +4,7 @@ import inspect
 import traceback
 from datetime import timedelta
 from urllib.parse import urlparse
+import bcrypt
 
 from pydantic import BaseModel, ConfigDict
 
@@ -159,6 +160,14 @@ def parse_json(json_string: str, pydantic_model: BaseModel = None) -> dict:
     
     # parse
     return parser.parse(json_string_clean[start_index:])
+
+
+def hash_password(password):
+    # Generate a salt
+    salt = bcrypt.gensalt()
+    # Hash the password with the salt
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed_password.decode('utf-8')
 
 
 # This is our masterwork during tea time
