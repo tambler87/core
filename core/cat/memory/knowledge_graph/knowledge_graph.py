@@ -14,19 +14,29 @@ from cat.utils import hash_password
 class KnowledgeGraph:
     """Yes, we are doing it."""
     
-    def __init__(self, dir_path=None):
+    def __init__(self, kg_path=None):
 
-        if dir_path is None:
-            dir_path = "cat/data/local_knowledge_graph"
+        if kg_path is None:
+            kg_path = self.get_folder_name()
+        self.kg_path = kg_path
 
-        #if True: # TODOGRAPH: create it if the file does not exist
-        shutil.rmtree(dir_path)
+        shutil.rmtree(kg_path, ignore_errors=True) 
+        
+        to_populate = not os.path.exists(kg_path)
+        if to_populate:
+            os.makedirs(kg_path)
 
-        os.makedirs(dir_path, exist_ok=True)
-        self.kg = kuzu.Database(dir_path)
+        # don't know if this can be kept as instance attribute
+        # https://kuzudb.com/api-docs/python/kuzu.html#Database.close
+        self.kg = kuzu.Database(self.kg_path)
 
         # Populate initial graph
-        self.create_base_graph()
+        if to_populate:
+            pass#self.create_base_graph()
+
+    def get_folder_name(self):
+        return "cat/data/local_knowledge_graph"
+
 
     # NOTE: not all DBs supporting Cypher require a description of nodes and relations before insertion)
     def create_base_graph(self):
@@ -113,4 +123,6 @@ class KnowledgeGraph:
             return result
         except Exception as e:
             log.error(e)
+
+        
         

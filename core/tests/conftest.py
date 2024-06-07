@@ -16,6 +16,7 @@ import cat.utils as utils
 
 from qdrant_client import QdrantClient
 from cat.memory.vector_memory import VectorMemory
+from cat.memory.knowledge_graph import KnowledgeGraph
 from cat.mad_hatter.mad_hatter import MadHatter
 from cat.mad_hatter.plugin import Plugin
 
@@ -31,10 +32,16 @@ def mock_classes(monkeypatch):
     monkeypatch.setattr(VectorMemory, "connect_to_vector_memory", mock_connect_to_vector_memory)
 
     # Use a different json settings db
+    # TODOGRAPH: delete after KG takes over
     def mock_get_file_name(self, *args, **kwargs):
         return "tests/mocks/metadata-test.json"
     monkeypatch.setattr(Database().__class__, "get_file_name", mock_get_file_name)
-    
+
+    # Use a different knowledge graph db
+    def mock_get_folder_name(self, *args, **kwargs):
+        return "tests/mocks/local_knowledge_graph_test"
+    monkeypatch.setattr(KnowledgeGraph, "get_folder_name", mock_get_folder_name)
+ 
     # Use mock utils plugin folder
     def get_test_plugin_folder():
         return "tests/mocks/mock_plugin_folder/"
@@ -52,6 +59,7 @@ def clean_up_mocks():
     to_be_removed = [
         "cat/metadata-test.json", # legacy position, now moved into mocks folder
         "tests/mocks/metadata-test.json",
+        "tests/mocks/local_knowledge_graph_test",
         "tests/mocks/mock_plugin.zip",
         "tests/mocks/mock_plugin/settings.json",
         "tests/mocks/mock_plugin_folder/mock_plugin",
