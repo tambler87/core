@@ -38,7 +38,6 @@ class KnowledgeGraph:
     def get_folder_name(self):
         return "cat/data/local_knowledge_graph"
 
-
     # NOTE: not all DBs supporting Cypher require a description of nodes and relations before insertion)
     def create_base_graph(self):
 

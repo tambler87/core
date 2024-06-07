@@ -38,9 +38,9 @@ def mock_classes(monkeypatch):
     monkeypatch.setattr(Database().__class__, "get_file_name", mock_get_file_name)
 
     # Use a different knowledge graph db
-    def mock_get_folder_name(self, *args, **kwargs):
-        return "tests/mocks/local_knowledge_graph_test"
-    monkeypatch.setattr(KnowledgeGraph, "get_folder_name", mock_get_folder_name)
+    #def mock_get_folder_name(self, *args, **kwargs):
+    #    return "tests/mocks/local_knowledge_graph_test"
+    #monkeypatch.setattr(KnowledgeGraph, "get_folder_name", mock_get_folder_name)
  
     # Use mock utils plugin folder
     def get_test_plugin_folder():
