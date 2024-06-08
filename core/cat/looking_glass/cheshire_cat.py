@@ -78,7 +78,7 @@ class CheshireCat:
         # load LLM and embedder
         self.load_natural_language()
 
-        # Load memories (vector collections and working_memory)
+        # Load memories (vector collections, knowledge graph, working_memory)
         self.load_memory()
 
         # After memory is loaded, we can get/create tools embeddings
@@ -240,6 +240,7 @@ class CheshireCat:
 
         # Custom auth_handler # TODOAUTH: change the name to custom_auth
         selected_auth_handler = crud.get_setting_by_name(name="auth_handler_selected")
+        log.error(selected_auth_handler)
 
         # if no auth_handler is saved, use default one and save to db
         if selected_auth_handler is None:
@@ -290,22 +291,22 @@ class CheshireCat:
         # Memory
 
         # Get embedder size (langchain classes do not store it)
-        embedder_size = len(self.embedder.embed_query("hello world"))
+        #embedder_size = len(self.embedder.embed_query("hello world"))
 
         # Get embedder name (useful for for vectorstore aliases)
-        if hasattr(self.embedder, "model"):
-            embedder_name = self.embedder.model
-        elif hasattr(self.embedder, "repo_id"):
-            embedder_name = self.embedder.repo_id
-        else:
-            embedder_name = "default_embedder"
+        #if hasattr(self.embedder, "model"):
+        #    embedder_name = self.embedder.model
+        #elif hasattr(self.embedder, "repo_id"):
+        #    embedder_name = self.embedder.repo_id
+        #else:
+        #    embedder_name = "default_embedder"
 
         # instantiate long term memory
-        vector_memory_config = {
-            "embedder_name": embedder_name,
-            "embedder_size": embedder_size,
-        }
-        self.memory = LongTermMemory(vector_memory_config=vector_memory_config)
+        #vector_memory_config = {
+        #    "embedder_name": embedder_name,
+        #    "embedder_size": embedder_size,
+        #}
+        #self.memory = LongTermMemory(vector_memory_config=vector_memory_config)
 
     def build_embedded_procedures_hashes(self, embedded_procedures):
 
