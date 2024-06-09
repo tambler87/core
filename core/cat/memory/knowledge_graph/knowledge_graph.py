@@ -6,6 +6,7 @@ import json
 # https://kuzudb.com/api-docs/python/kuzu.html
 import kuzu
 
+from cat.db.database import Database
 from cat.env import get_env
 from cat.log import log
 from cat.utils import hash_password
@@ -95,13 +96,20 @@ class KnowledgeGraph:
         
 
     def migrate_legacy_sqlite(self):
-        from cat.db.database import Database
+
+        return
+        # useful to move old metadata.json into the graph (inactive ATM)
+        """
         db_file = Database().get_file_name() #get_env("CCAT_METADATA_FILE")
-        if not os.path.exists(db_file):
+        if (not os.path.exists(db_file)):
             return
         
-        with open(db_file) as f:
-            db = json.load(f)
+        try:
+            with open(db_file) as f:
+                db = json.load(f)
+        except:
+            # empty file
+            return
 
         db = db["_default"]
         for _, record in db.items():
@@ -113,7 +121,7 @@ class KnowledgeGraph:
                 "category": record["category"]
             }
             self.create_node("Setting", record_dict)
-
+        """
 
 
     def __call__(self, query: str, params=None):
