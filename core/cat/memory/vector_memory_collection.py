@@ -117,6 +117,7 @@ class VectorMemoryCollection():
             # shard_number=3,
         )
 
+        # set collection alias so we can know embedder size and name from the vector db
         self.client.update_collection_aliases(
             change_aliases_operations=[
                 CreateAliasOperation(

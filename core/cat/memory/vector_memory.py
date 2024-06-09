@@ -18,19 +18,34 @@ from cat.env import get_env
 class VectorMemory:
     local_vector_db = None
 
-    def __init__(
-            self,
-            embedder_name=None,
-            embedder_size=None,
-        ) -> None:
+    def __init__(self) -> None:
 
         # connects to Qdrant and creates self.vector_db attribute
         self.connect_to_vector_memory()
 
-        # Create vector collections
-        # - Episodic memory will contain user and eventually cat utterances
-        # - Declarative memory will contain uploaded documents' content
-        # - Procedural memory will contain tools and knowledge on how to do things
+        # Note: we do not create collectins immediately,
+        # since there is no embedder set yet
+        # when there will be an embedder, Cat will call:
+        #   `vector_memory.init_collections_with_embedder(embedder)``
+        # Same method will be called any time the embedder changes.
+        
+    def init_collections_with_embedder(self, embedder):
+
+        # Get embedder size (langchain classes do not store it)
+        embedder_size = len(embedder.embed_query("hello world"))
+
+        # Get embedder name (useful for for vectorstore aliases)
+        if hasattr(embedder, "model"):
+            embedder_name = embedder.model
+        elif hasattr(embedder, "repo_id"):
+            embedder_name = embedder.repo_id
+        else:
+            embedder_name = "default_embedder"
+        
+        # Init vector collections
+        # - Episodic memory contains user and eventually cat utterances
+        # - Declarative memory contains uploaded documents' content
+        # - Procedural memory contains tool/form triggers, and knowledge on how to do things
         self.collections = {}
         for collection_name in ["episodic", "declarative", "procedural"]:
             # Instantiate collection

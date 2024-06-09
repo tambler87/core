@@ -85,7 +85,7 @@ def test_memory_collection_procedural_has_tools_after_clear(client):
     
     # tool should be automatically re-embedded after memory deletion
     collections_n_points = get_collections_names_and_point_count(client)
-    assert collections_n_points["procedural"] == 3 # still 1!
+    assert collections_n_points["procedural"] == 3 # still 3!
 
 
 def test_memory_collections_wipe(client):

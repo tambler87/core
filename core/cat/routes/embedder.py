@@ -139,11 +139,10 @@ def upsert_embedder_setting(
     }
 
     ccat = request.app.state.ccat
-    # reload llm and embedder of the cat
-    ccat.load_natural_language()
-    # crete new collections (different embedder!)
     try:
-        ccat.load_memory()
+        # reload llm and embedder of the cat
+        # and crete new collections (different embedder!)
+        ccat.load_natural_language()
     except Exception as e:
         log.error(e)
         crud.delete_settings_by_category(category=EMBEDDER_SELECTED_CATEGORY)
@@ -158,8 +157,9 @@ def upsert_embedder_setting(
             crud.upsert_setting_by_name(
                 models.Setting(name=EMBEDDER_SELECTED_NAME, category=EMBEDDER_SELECTED_CATEGORY, value={"name":languageEmbedderName})
             )
-            # reload llm and embedder of the cat
-            ccat.load_natural_language()
+        
+        # reload llm and embedder of the cat with previous configuration
+        ccat.load_natural_language()
 
         raise HTTPException(
             status_code=400,
@@ -167,7 +167,5 @@ def upsert_embedder_setting(
                 "error": utils.explicit_error_message(e)
             }
         )
-    # recreate tools embeddings
-    ccat.mad_hatter.find_plugins()
 
     return status

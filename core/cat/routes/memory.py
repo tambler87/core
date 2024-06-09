@@ -102,8 +102,8 @@ async def wipe_collections(
         ret = vector_memory.vector_db.delete_collection(collection_name=c)
         to_return[c] = ret
 
-    ccat.load_memory()  # recreate the long term memories
-    ccat.mad_hatter.find_plugins()
+    # recreate collections according to embedder
+    ccat.embedder_changed()
 
     return {
         "deleted": to_return,
@@ -131,8 +131,8 @@ async def wipe_single_collection(request: Request, collection_id: str) -> Dict:
     ret = vector_memory.vector_db.delete_collection(collection_name=collection_id)
     to_return[collection_id] = ret
 
-    ccat.load_memory()  # recreate the long term memories
-    ccat.mad_hatter.find_plugins()
+    # recreate collection according to embedder
+    ccat.embedder_changed()
 
     return {
         "deleted": to_return,

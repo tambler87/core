@@ -62,35 +62,31 @@ class CheshireCat:
         """
         
         # bootstrap the Cat! ^._.^
-        
-        # load AuthHandler
-        self.load_auth()
 
-        # Start scheduling system
-        self.white_rabbit = WhiteRabbit()
+        # Load memories (vector collections, knowledge graph)
+        # TODO: actual metadata.json's settings should be included in knowledge graph
+        self.memory = LongTermMemory()
         
-        # instantiate MadHatter (loads all plugins' hooks and tools)
+        # instantiate MadHatter (loads all plugins' hooks, tools and forms)
         self.mad_hatter = MadHatter()
-
-        # allows plugins to do something before cat components are loaded
+        # allows plugins to do something before other cat components are loaded
         self.mad_hatter.execute_hook("before_cat_bootstrap", cat=self)
 
         # load LLM and embedder
+        #  once the embedder is set, will update also mad_hatter and vector_memory
         self.load_natural_language()
-
-        # Load memories (vector collections, knowledge graph, working_memory)
-        self.load_memory()
-
-        # After memory is loaded, we can get/create tools embeddings
-        # every time the mad_hatter finishes syncing hooks, tools and forms, it will notify the Cat (so it can embed tools in vector memory)
-        self.mad_hatter.on_finish_plugins_sync_callback = self.embed_procedures
-        self.embed_procedures()  # first time launched manually
+        
+        # Start scheduling system
+        self.white_rabbit = WhiteRabbit()
 
         # Agent manager instance (for reasoning)
         self.agent_manager = AgentManager()
 
         # Rabbit Hole Instance
         self.rabbit_hole = RabbitHole(self)  # :(
+
+        # load AuthHandlers
+        self.load_auth()
 
         # allows plugins to do something after the cat bootstrap is complete
         self.mad_hatter.execute_hook("after_cat_bootstrap", cat=self)
@@ -113,6 +109,20 @@ class CheshireCat:
         # LLM and embedder
         self._llm = self.load_language_model()
         self.embedder = self.load_language_embedder()
+
+        # After the embedder is loaded or changed, we can make other components aware of it
+        self.embedder_changed()
+                
+    def embedder_changed(self):
+        """Align vector memory and embedder on embedder change"""
+
+        # 1 - Vector collections can check for dimensionality
+        self.memory.vectors.init_collections_with_embedder(self.embedder)
+        # 2 - Tools and forms can now be embedded.
+        #     Every time the mad_hatter finishes syncing hooks, tools and forms,
+        #     it will notify the Cat (so it can embed tools in vector memory)
+        self.mad_hatter.on_finish_plugins_sync_callback = self.embed_procedures
+        self.embed_procedures()  # first time launched manually
 
     def load_language_model(self) -> BaseLanguageModel:
         """Large Language Model (LLM) selection at bootstrap time.
@@ -285,29 +295,7 @@ class CheshireCat:
                 auth_handlers.CoreAuthHandlerConfig.get_auth_handler_from_config({})
         
         self.auth_handler = auth_handler
-
-    def load_memory(self):
-        """Load LongTerMemory and WorkingMemory."""
-        # Memory
-
-        # Get embedder size (langchain classes do not store it)
-        embedder_size = len(self.embedder.embed_query("hello world"))
-
-        # Get embedder name (useful for for vectorstore aliases)
-        if hasattr(self.embedder, "model"):
-            embedder_name = self.embedder.model
-        elif hasattr(self.embedder, "repo_id"):
-            embedder_name = self.embedder.repo_id
-        else:
-            embedder_name = "default_embedder"
-
-        # instantiate long term memory
-        vector_memory_config = {
-            "embedder_name": embedder_name,
-            "embedder_size": embedder_size,
-        }
-        self.memory = LongTermMemory(vector_memory_config=vector_memory_config)
-
+        
     def build_embedded_procedures_hashes(self, embedded_procedures):
 
         hashes = {}
